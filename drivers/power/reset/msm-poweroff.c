@@ -28,6 +28,9 @@
 #include <soc/qcom/watchdog.h>
 #include <soc/qcom/minidump.h>
 
+#include <linux/oem/op_misc.h>
+#include "oem_msm_poweroff.c"
+
 #define EMERGENCY_DLOAD_MAGIC1    0x322A4F99
 #define EMERGENCY_DLOAD_MAGIC2    0xC67E4350
 #define EMERGENCY_DLOAD_MAGIC3    0x77777777
@@ -450,6 +453,17 @@ static void msm_restart_prepare(const char *cmd)
 		} else if (!strcmp(cmd, "keys clear")) {
 			reason = PON_RESTART_REASON_KEYS_CLEAR;
 			__raw_writel(0x7766550a, restart_reason);
+		} else if (!strcmp(cmd, "sbllowmemtest")) {
+			reason = PON_RESTART_REASON_SBL_DDR_CUS;
+			__raw_writel(0x7766550b, restart_reason);
+		} else if (!strcmp(cmd, "sblmemtest")) {
+			pr_info("[%s:%d] lunch ddr test!!\n", current->comm, current->pid);
+			reason = PON_RESTART_REASON_SBL_DDRTEST;
+			__raw_writel(0x7766550b, restart_reason);
+		} else if (!strcmp(cmd, "usermemaging")) {
+			pr_info("[%s:%d] lunch user memory test!!\n", current->comm, current->pid);
+			reason = PON_RESTART_REASON_MEM_AGING;
+			__raw_writel(0x7766550b, restart_reason);
 		} else if (!strncmp(cmd, "oem-", 4)) {
 			unsigned long code;
 			int ret;
@@ -460,8 +474,6 @@ static void msm_restart_prepare(const char *cmd)
 					     restart_reason);
 		} else if (!strncmp(cmd, "edl", 3)) {
 			enable_emergency_dload_mode();
-		} else {
-			__raw_writel(0x77665501, restart_reason);
 		}
 
 		if (reason && nvmem_cell)
