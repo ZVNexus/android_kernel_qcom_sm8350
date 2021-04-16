@@ -22,7 +22,7 @@
 #include <linux/input.h>
 #include <linux/seq_file.h>
 #include <linux/sde_rsc.h>
-#include <linux/oem/boot_mode.h>
+#include <../../../oneplus/include/linux/oem/boot_mode.h>
 
 #include "msm_drv.h"
 #include "sde_kms.h"

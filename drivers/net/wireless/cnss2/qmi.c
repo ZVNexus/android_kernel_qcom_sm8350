@@ -4,7 +4,7 @@
 #include <linux/firmware.h>
 #include <linux/module.h>
 #include <linux/soc/qcom/qmi.h>
-#include <linux/oem/boot_mode.h>
+#include <../../../../techpack/oneplus/include/linux/oem/boot_mode.h>
 
 #include "bus.h"
 #include "debug.h"

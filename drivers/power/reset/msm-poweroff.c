@@ -28,8 +28,8 @@
 #include <soc/qcom/watchdog.h>
 #include <soc/qcom/minidump.h>
 
-#include <linux/oem/op_misc.h>
-#include "oem_msm_poweroff.c"
+#include <../../../techpack/oneplus/include/linux/oem/op_misc.h>
+#include "../../../techpack/oneplus/overlay/oem_msm_poweroff.c"
 
 #define EMERGENCY_DLOAD_MAGIC1    0x322A4F99
 #define EMERGENCY_DLOAD_MAGIC2    0xC67E4350
