@@ -892,13 +892,8 @@ static int qti_flash_led_calc_max_avail_current(
 		vph_flash_uv, vin_flash_uv, p_flash_fw;
 	union power_supply_propval prop = {};
 
-	rc = qti_battery_charger_get_prop("battery", BATTERY_RESISTANCE,
-						&rbatt_uohm);
-	if (rc < 0) {
-		pr_err("Failed to get battery resistance, rc=%d\n",
-				rc);
-		return rc;
-	}
+	rc = 0;
+	rbatt_uohm = 0;
 
 	if (!rbatt_uohm) {
 		*max_current_ma = MAX_FLASH_CURRENT_MA;
