@@ -1,5 +1,5 @@
 ifneq ($(CONFIG_ARCH_QTI_VM), y)
-ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
+ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY_QCOM),y)
 dtbo-$(CONFIG_ARCH_LAHAINA) += lahaina-rumi-overlay.dtbo \
 	lahaina-mtp-overlay.dtbo \
 	lahaina-mtp-hsp-overlay.dtbo \
@@ -37,6 +37,21 @@ lahaina-mtp-v2-overlay.dtbo-base := lahaina.dtb lahaina-v2.dtb \
 lahaina-mtp-v2.1-overlay.dtbo-base := lahaina.dtb lahaina-v2.dtb \
 					lahaina-v2.1.dtb
 else
+ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
+        dtbo-$(CONFIG_ARCH_LAHAINA) += \
+            lemonadep-overlay-evb.dtbo \
+            lemonadep-overlay-t0.dtbo \
+            lemonadep-overlay.dtbo \
+            lemonade-overlay.dtbo \
+            lemonadev-overlay.dtbo
+
+lemonadep-overlay-evb.dtbo-base := lahaina.dtb lahaina-v2.dtb lahaina-v2.1.dtb
+lemonadep-overlay-t0.dtbo-base := lahaina.dtb lahaina-v2.dtb lahaina-v2.1.dtb
+lemonadep-overlay.dtbo-base := lahaina.dtb lahaina-v2.dtb lahaina-v2.1.dtb
+lemonade-overlay.dtbo-base := lahaina.dtb lahaina-v2.dtb lahaina-v2.1.dtb
+lemonadev-overlay.dtbo-base := lahaina.dtb lahaina-v2.dtb lahaina-v2.1.dtb
+else
+
 dtb-$(CONFIG_ARCH_LAHAINA) += lahaina-rumi.dtb \
 	lahaina-mtp-hsp.dtb \
 	lahaina-mtp.dtb \
@@ -73,6 +88,7 @@ dtb-$(CONFIG_ARCH_LAHAINA) += lahaina-rumi.dtb \
 	lahainap-v2.1-qrd.dtb \
 	lahaina-mtp-v2.dtb \
 	lahaina-mtp-v2.1.dtb
+endif
 endif
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
