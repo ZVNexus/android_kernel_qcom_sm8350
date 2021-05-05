@@ -10,7 +10,7 @@ ifeq ($(KERNEL_BUILD), y)
 	# These are provided in external module based builds
 	# Need to explicitly define for Kernel-based builds
 	MODNAME := wlan
-	WLAN_ROOT := $(srctree)/$(src)
+	WLAN_ROOT := drivers/staging/qcacld-3.0
 	WLAN_COMMON_ROOT := ../qca-wifi-host-cmn
 	WLAN_COMMON_INC := $(WLAN_ROOT)/$(WLAN_COMMON_ROOT)
 	WLAN_FW_API := $(WLAN_ROOT)/../fw-api/
@@ -23,9 +23,6 @@ WLAN_FW_API ?= $(WLAN_ROOT)/../fw-api/
 WLAN_PROFILE ?= default
 CONFIG_QCA_CLD_WLAN_PROFILE ?= $(WLAN_PROFILE)
 
-# Force user build
-TARGET_BUILD_VARIANT := user
-
 ifeq ($(KERNEL_BUILD), n)
 ifneq ($(ANDROID_BUILD_TOP),)
       ANDROID_BUILD_TOP_REL := $(shell python -c "import os.path; print(os.path.relpath('$(ANDROID_BUILD_TOP)'))")
@@ -35,7 +32,7 @@ ifneq ($(ANDROID_BUILD_TOP),)
 endif
 endif
 
-include $(WLAN_ROOT)/configs/$(patsubst "%",%,$(CONFIG_QCA_CLD_WLAN_PROFILE))_defconfig
+include $(WLAN_ROOT)/configs/$(CONFIG_QCA_CLD_WLAN_PROFILE)_defconfig
 
 # add configurations in WLAN_CFG_OVERRIDE
 ifneq ($(WLAN_CFG_OVERRIDE),)
