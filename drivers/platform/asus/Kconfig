@@ -1,0 +1,20 @@
+config MACH_ASUS
+	bool "ASUS device"
+	help
+	  Support for ASUS products
+
+menu "ASUS board selection"
+
+config MACH_ASUS_SAKE
+	bool "ZenFone 8"
+	select MACH_ASUS
+	help
+	  Support for ZenFone 8
+
+config MACH_ASUS_VODKA
+	bool "ZenFone 8 Flip"
+	select MACH_ASUS
+	help
+	  Support for ZenFone 8 Flip
+
+endmenu
