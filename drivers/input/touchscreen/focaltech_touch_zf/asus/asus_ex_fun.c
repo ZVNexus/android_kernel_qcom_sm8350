@@ -72,27 +72,6 @@ void asus_tp_charge_mode (bool enable)
     }
 }
 
-static int charge_notifier_callback(struct notifier_block *self,
-                                 unsigned long event, void *data)
-{
-    
-    FTS_INFO("USB event:%lu", event);
-    switch (event) {
-    case QTI_POWER_SUPPLY_CHARGED:
-	FTS_INFO("QTI_POWER_SUPPLY_CHARGED");
-	asus_tp_charge_mode(true);
-	fts_data->charge_notify_charge = true;
-        break;
-    case QTI_POWER_SUPPLY_UNCHARGED:
-	FTS_INFO("QTI_POWER_SUPPLY_UNCHARGED");
-	asus_tp_charge_mode(false);
-	fts_data->charge_notify_charge = false;
-        break;
-    }
-    
-    return 0;
-}
-
 void fts_ex_fun_recovery(struct fts_ts_data *ts_data) 
 {
   int ret;
@@ -437,14 +416,11 @@ int asus_create_sysfs(struct fts_ts_data *ts_data)
 
     proc_create(GLOVE, 0666, NULL, &asus_ex_proc_glove_ops);
     proc_create(FPXY, 0777, NULL, &asus_ex_proc_fpxy_ops);
-    
+
     ts_data->fp_enable = 0;
     ts_data->fp_report_type = 0;
     fts_data->auth_complete = 1;
     ts_data->phone_call_state = false;
-    
-    ts_data->charge_notify.notifier_call = charge_notifier_callback;
-    qti_charge_register_notify(&ts_data->charge_notify);
 
     return ret;
 }
@@ -452,6 +428,5 @@ int asus_create_sysfs(struct fts_ts_data *ts_data)
 int asus_remove_sysfs(struct fts_ts_data *ts_data)
 {
     sysfs_remove_group(&ts_data->dev->kobj, &asus_attribute_group);
-    qti_charge_unregister_notify(&ts_data->charge_notify);
     return 0;
 }

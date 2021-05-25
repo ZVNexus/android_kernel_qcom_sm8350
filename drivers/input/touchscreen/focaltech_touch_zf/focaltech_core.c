@@ -54,9 +54,6 @@
 #include <linux/msm_drm_notify.h>
 #endif
 
-/* ASUS BSP Display +++ */
-#include <drm/drm_zf8.h>
-
 /*****************************************************************************
 * Private constant and macro definitions using #define
 *****************************************************************************/
@@ -75,8 +72,6 @@
 *****************************************************************************/
 struct fts_ts_data *fts_data;
 bool tp3518u = false;
-extern int g_SAKE_Panel_ID;
-extern int g_ASUS_hwID;
 //fod
 static int fts_fp_position[4] = {410,670, 1631, 1891};
 static int *fp_position = NULL;
@@ -527,7 +522,6 @@ static int fts_input_report_b(struct fts_ts_data *data)
                         input_report_key(data->input_dev, KEY_F,0);
                         input_sync(data->input_dev);
                         /* ASUS BSP Display +++ */
-                        zf8_drm_notify(ASUS_NOTIFY_FOD_TOUCHED, 1);
                         data->fp_x = events[i].x;
                         data->fp_y = events[i].y;
                         fp_press = 2;
@@ -1100,12 +1094,9 @@ static int fts_power_source_ctrl(struct fts_ts_data *ts_data, int enable)
                     FTS_ERROR("enable vcc_i2c regulator failed,ret=%d", ret);
                 }
             }
-if (g_ASUS_hwID > 1 && g_ASUS_hwID < 3) {
-            gpio_direction_output(ts_data->pdata->vddio, 1);
-}
-	    
+
             msleep(1);
-	    
+
 	    ret = regulator_enable(ts_data->vdd);
             if (ret) {
                 FTS_ERROR("enable vdd regulator failed,ret=%d", ret);
@@ -1118,10 +1109,6 @@ if (g_ASUS_hwID > 1 && g_ASUS_hwID < 3) {
             FTS_DEBUG("regulator disable !");
             gpio_direction_output(ts_data->pdata->reset_gpio, 0);
             msleep(10);
-if (g_ASUS_hwID > 1 && g_ASUS_hwID < 3) {
-	    gpio_direction_output(ts_data->pdata->vddio, 0);
-            msleep(1);
-}
             ret = regulator_disable(ts_data->vdd);
             if (ret) {
                 FTS_ERROR("disable vdd regulator failed,ret=%d", ret);
@@ -1163,7 +1150,6 @@ static int fts_power_source_init(struct fts_ts_data *ts_data)
     }
 
     if (regulator_count_voltages(ts_data->vdd) > 0) {
-if (g_ASUS_hwID > 1) {
         ret = regulator_set_voltage(ts_data->vdd, FTS_VTG_MIN_UV,
                                     FTS_VTG_MAX_UV);
         if (ret) {
@@ -1171,15 +1157,6 @@ if (g_ASUS_hwID > 1) {
             regulator_put(ts_data->vdd);
             return ret;
         }
-} else {
-        ret = regulator_set_voltage(ts_data->vdd, FTS_VTG_MIN_UV,
-                                    3008000);
-        if (ret) {
-            FTS_ERROR("vdd regulator set_vtg failed ret=%d", ret);
-            regulator_put(ts_data->vdd);
-            return ret;
-        }
-}
     }
 
     ts_data->vcc_i2c = regulator_get(ts_data->dev, "vcc_i2c");
@@ -1220,11 +1197,7 @@ static int fts_power_source_exit(struct fts_ts_data *ts_data)
 
     if (!IS_ERR_OR_NULL(ts_data->vdd)) {
         if (regulator_count_voltages(ts_data->vdd) > 0) {
-            if (g_ASUS_hwID > 1) {
                 regulator_set_voltage(ts_data->vdd, 0, FTS_VTG_MAX_UV);
-            } else {
-                regulator_set_voltage(ts_data->vdd, 0, 3008000);
-            }
         }
         regulator_put(ts_data->vdd);
     }
@@ -1307,28 +1280,9 @@ static int fts_gpio_configure(struct fts_ts_data *data)
     }
 
     /* request vddio gpio */
-if (g_ASUS_hwID > 1 && g_ASUS_hwID < 3) {
-    if (gpio_is_valid(data->pdata->vddio)) {
-        ret = gpio_request(data->pdata->vddio, "fts_vddio");
-        if (ret) {
-            FTS_ERROR("[GPIO]vddio gpio request failed");
-            goto err_irq_gpio_dir;
-        }
-
-        ret = gpio_direction_output(data->pdata->vddio, 0);
-        if (ret) {
-            FTS_ERROR("[GPIO]set_direction for vddio gpio failed");
-            goto err_vddio_dir;
-        }
-    }
-}
-    
     FTS_FUNC_EXIT();
     return 0;
 
-err_vddio_dir:
-    if (gpio_is_valid(data->pdata->vddio))
-        gpio_free(data->pdata->vddio);
 err_reset_gpio_dir:
     if (gpio_is_valid(data->pdata->reset_gpio))
         gpio_free(data->pdata->reset_gpio);
@@ -1439,14 +1393,6 @@ static int fts_parse_dt(struct device *dev, struct fts_ts_platform_data *pdata)
     if (pdata->irq_gpio < 0)
         FTS_ERROR("Unable to get irq_gpio");
 
-if (g_ASUS_hwID > 1 && g_ASUS_hwID < 3) {
-    pdata->vddio = of_get_named_gpio_flags(np, "focaltech,vddio",
-                      0, &pdata->vddio_flags);
-	
-    if (pdata->vddio < 0)
-        FTS_ERROR("Unable to get vddio");
-}
-    
     ret = of_property_read_u32(np, "focaltech,max-touch-number", &temp_val);
     if (ret < 0) {
         FTS_ERROR("Unable to get max-touch-number, please check dts");
@@ -1460,13 +1406,8 @@ if (g_ASUS_hwID > 1 && g_ASUS_hwID < 3) {
             pdata->max_touch_number = temp_val;
     }
 
-if (g_ASUS_hwID > 1 && g_ASUS_hwID < 3) {
-    FTS_INFO("max touch number:%d, irq gpio:%d, reset gpio:%d, vddio:%d",
-             pdata->max_touch_number, pdata->irq_gpio, pdata->reset_gpio,pdata->vddio);
-} else {
     FTS_INFO("max touch number:%d, irq gpio:%d, reset gpio:%d",
              pdata->max_touch_number, pdata->irq_gpio, pdata->reset_gpio);
-}
 
     FTS_FUNC_EXIT();
     return 0;
@@ -1709,16 +1650,10 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
         if (ret)
             FTS_ERROR("device-tree parse fail");
 
-#if defined(CONFIG_DRM)
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0))
-        if (g_SAKE_Panel_ID == 1 && g_ASUS_hwID > 1) {
-            ret = drm_check_dt(ts_data->dev->of_node);
-            if (ret) {
-                FTS_ERROR("parse drm-panel fail");
-            }
+        ret = drm_check_dt(ts_data->dev->of_node);
+        if (ret) {
+            FTS_ERROR("parse drm-panel fail");
         }
-#endif
-#endif
     } else {
         if (ts_data->dev->platform_data) {
             memcpy(ts_data->pdata, ts_data->dev->platform_data, pdata_size);

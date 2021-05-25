@@ -1,7 +1,5 @@
 #include "focaltech_core.h"
 #include "asus_tp.h"
-/* Sake BSP Display +++ */
-#include <drm/drm_zf8.h>
 
 /**********************************************************
 report key code
@@ -51,8 +49,6 @@ gesture id
 /*****************************************************************************
 * Global variable or extern global variabls/functions
 *****************************************************************************/
-extern bool proximityStatus(void);
-
 u8 reg_D1 = 0x00;
 u8 reg_D2 = 0x00;
 u8 reg_D5 = 0x00;
@@ -81,7 +77,6 @@ void asus_gesture_report(struct fts_ts_data *ts_data, int gesture_id)
 {
     int gesture = -1;
     struct input_dev *input_dev = ts_data->input_dev;
-    bool proxy_status = false;
     bool gesture_filter = false;
 
     FTS_DEBUG("gesture_id:0x%x, fp_report_type:%d", gesture_id, ts_data->fp_report_type);
@@ -98,7 +93,6 @@ void asus_gesture_report(struct fts_ts_data *ts_data, int gesture_id)
 	if ((ts_data->fp_enable == 1) && (ts_data-> fp_report_type!=0)) {
 	  FTS_INFO("key F");
 	  /* ASUS BSP Display +++ */
-	  zf8_drm_notify(ASUS_NOTIFY_FOD_TOUCHED, 1);
 	  ts_data->next_resume_isaod = true;
 	  ts_data->fp_filter = true;
 	  gesture = KEY_GESTURE_F;
@@ -129,15 +123,6 @@ void asus_gesture_report(struct fts_ts_data *ts_data, int gesture_id)
 	input_report_key(input_dev, gesture, 0);
 	input_sync(input_dev);
 	return;
-    }
-
-    proxy_status = proximityStatus();
-    if (proxy_status) {
-	FTS_INFO("Proximity on");
-        if (ts_data->phone_call_state) { return; }
-        else {
-	  gesture_filter = true;
-	}
     }
 
     switch (gesture_id) {
