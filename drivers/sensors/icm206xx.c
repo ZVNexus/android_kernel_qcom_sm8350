@@ -3079,7 +3079,7 @@ void report_wq(struct work_struct *work)
 extern int asus_get_se_proto(struct spi_device *spi);
 static bool icm_spi_check_bus(struct spi_device *spi)
 {
-	int proto = asus_get_se_proto(spi);
+	int proto = get_se_proto(spi);
 	icm_dbgmsg("proto = %d", proto);
 	if (unlikely(proto != SPI)) {
 		return false;
