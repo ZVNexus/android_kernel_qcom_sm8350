@@ -1272,27 +1272,6 @@ EXIT:
 
 }
 
-int insure_debug_write() {
-	struct es928x_jdet_priv *es928x_jdet;
-	pr_err("[es928x] insure_debug_write: enter\n");
-
-	if (g_es928x->jdet == NULL || strlen(g_es928x->audio_debug) == 0)
-		return 1;
-
-	es928x_jdet = g_es928x->jdet;
-
-	if (strncmp(g_es928x->audio_debug, "1", 1) == 0) {
-		pr_err("[es928x] debug mode disable irq(%d)\n", es928x_jdet->irq);
-		gpio_set_value_cansleep(g_es928x->gpio_audio_debug, 0); /* enable uart log, disable audio */
-		es928x_jdet->debug_mode = true;
-	} else if (strncmp(g_es928x->audio_debug, "0", 1) == 0) {
-		pr_err("[es928x] headset mode enable irq(%d)\n", es928x_jdet->irq);
-		gpio_set_value_cansleep(g_es928x->gpio_audio_debug, 1);	/* disable uart log, enable audio */
-		es928x_jdet->debug_mode = false;
-	}
-	return 0;
-}
-
 int es928x_jdet_init(struct snd_soc_component *component)
 {
 	struct es928x_priv *es928x = snd_soc_component_get_drvdata(component);
@@ -1331,9 +1310,6 @@ int es928x_jdet_init(struct snd_soc_component *component)
 	}
 	es928x_jdet->component = component;
 	es928x->jdet = es928x_jdet;
-	ret = insure_debug_write(); //ASUS BSP Jackson +++
-	if(ret)
-		dev_err(es928x->dev, "%s insure_debug_write: jdet not init or property not set.\n", __func__);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(es928x_jdet_init);
