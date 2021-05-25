@@ -59,9 +59,6 @@
 
 extern int asus_extcon_set_state_sync(struct extcon_dev *edev, int cable_state); //ASUS_BSP
 
-static int g_CAP_STATUS_UEVENT = CAP_STATUS_UEVENT_NONE; //ASUS_BSP register cap_satus uevent
-static int g_CAP_STATUS_UEVENT_last = CAP_STATUS_UEVENT_NONE; //ASUS_BSP register cap_satus uevent
-
 /*! \struct sx932x
  * Specialized struct containing input event data, platform data, and
  * last cap state read if needed.
@@ -318,94 +315,6 @@ static ssize_t sx932x_raw_data_show(struct device *dev,
 	return 0;
 }
 
-#if 0
-static int read_cap_status(psx93XX_t this)
-{
-    u8 msb = 0, lsb = 0;
-    s32 useful_ph0;
-
-	if(this->failStatusCode != 0 ){
-		pr_info("[SX932x] failcode = 0x%x\n", this->failStatusCode);
-		return -1;
-	}
-	
-	//get PH0(CS0) useful
-	write_register(this, SX932x_CPSRD,0);
-	read_register(this, SX932x_USEMSB, &msb);
-	read_register(this, SX932x_USELSB, &lsb);
-	useful_ph0 = (s32)((msb << 8) | lsb);
-	if (useful_ph0 > 32767)
-		useful_ph0 -= 65536;
-
-
-    if (useful_ph0 >= 1800) {
-        pr_info("[SX932x] Near\n");
-		asus_extcon_set_state_sync(this->cap_satus_extcon, 1);
-		return 1;
-    } else {
-        pr_info("[SX932x] Far\n");
-		asus_extcon_set_state_sync(this->cap_satus_extcon, 0);
-        return 0;
-    }
-}
-#endif
-
-static int read_cap_status(psx93XX_t this)
-{
-	int ret;
-	
-	if(g_CAP_STATUS_UEVENT == CAP_STATUS_UEVENT_FAR){
-		pr_info("[SX932x] Far\n");
-		asus_extcon_set_state_sync(this->cap_satus_extcon, 0);
-		ret = 0;
-	}else{
-		pr_info("[SX932x] Near\n");
-		asus_extcon_set_state_sync(this->cap_satus_extcon, 1);
-		ret = 1;
-	}
-	g_CAP_STATUS_UEVENT_last = g_CAP_STATUS_UEVENT;
-
-	return ret;
-}
-
-static ssize_t sx932x_cap_status_show(struct device *dev,
-						struct device_attribute *attr, char *buf)
-{
-    psx93XX_t this = dev_get_drvdata(dev);
-    int ret = read_cap_status(this);
-	return sprintf(buf, "%d\n", ret);
-}
-
-static int read_cap2_status(psx93XX_t this)
-{
-    u8 reg_val = 0;
-    int ret = read_register(this, SX932x_USELSB, &reg_val);
-    if (ret < 0) {
-        pr_err("[SX932x] read cap2 register fail\n");
-        return -1;
-    } else {
-        if (reg_val == 0xfe) {
-            pr_info("[SX932x] CS2: near\n");
-        } else {
-            pr_info("[SX932x] CS2: far\n");
-            return -1;
-        }
-    }
-    return 0;
-}
-
-static ssize_t sx932x_cap2_status_show(struct device *dev,
-                                                struct device_attribute *attr, char *buf)
-{
-    psx93XX_t this = dev_get_drvdata(dev);
-    int ret = read_cap2_status(this);
-    if (ret == 0) {
-        return sprintf(buf, "1\n");
-    } else {
-        return sprintf(buf, "0\n");
-    }
-}
-
 static ssize_t sx932x_register_dump_show(struct device *dev,
                                                 struct device_attribute *attr, char *buf)
 {
@@ -430,16 +339,12 @@ static DEVICE_ATTR(manual_calibrate, 0664, manual_offset_calibration_show,manual
 static DEVICE_ATTR(register_write,  0664, NULL,sx932x_register_write_store);
 static DEVICE_ATTR(register_read,0664, NULL,sx932x_register_read_store);
 static DEVICE_ATTR(raw_data,0664,sx932x_raw_data_show,NULL);
-static DEVICE_ATTR(cap_status,0664,sx932x_cap_status_show,NULL);
-static DEVICE_ATTR(cap2_status,0664,sx932x_cap2_status_show,NULL);
 static DEVICE_ATTR(register_dump,0664,sx932x_register_dump_show,NULL);
 static struct attribute *sx932x_attributes[] = {
 	&dev_attr_manual_calibrate.attr,
 	&dev_attr_register_write.attr,
 	&dev_attr_register_read.attr,
 	&dev_attr_raw_data.attr,
-	&dev_attr_cap_status.attr,
-	&dev_attr_cap2_status.attr,
 	&dev_attr_register_dump.attr,
 	NULL,
 };
@@ -588,30 +493,10 @@ static void touchProcess(psx93XX_t this)
 		}
 		input_sync(input);
 
-		read_cap_status(this);//ASUS_BSP update cap_status uevent for RIL
-
    //dev_info(this->pdev, "Leaving touchProcess()\n");
   }
 }
 #endif
-
-//ASUS_BSP +++ register cap_satus uevent
-static void cap_status_uevent_far(psx93XX_t this)
-{
-	g_CAP_STATUS_UEVENT = CAP_STATUS_UEVENT_FAR;
-	
-	if(g_CAP_STATUS_UEVENT_last != g_CAP_STATUS_UEVENT)
-		read_cap_status(this);
-}
-
-static void cap_status_uevent_near(psx93XX_t this)
-{
-	g_CAP_STATUS_UEVENT = CAP_STATUS_UEVENT_NEAR;
-
-	if(g_CAP_STATUS_UEVENT_last != g_CAP_STATUS_UEVENT)
-		read_cap_status(this);
-}
-//ASUS_BSP --- register cap_satus uevent
 
 static int sx932x_parse_dt(struct sx932x_platform_data *pdata, struct device *dev)
 {
@@ -834,8 +719,6 @@ static int sx932x_probe(struct i2c_client *client, const struct i2c_device_id *i
 			this->statusFunc[2] = 0; /* UNUSED */
 			this->statusFunc[3] = 0;//read_rawData; /* CONV_STAT */
 			this->statusFunc[4] = 0; /* COMP_STAT */
-			this->statusFunc[5] = cap_status_uevent_far;//touchProcess; /* RELEASE_STAT */
-			this->statusFunc[6] = cap_status_uevent_near;//touchProcess; /* TOUCH_STAT  */
 			this->statusFunc[7] = 0; /* RESET_STAT */
 		}
 
@@ -903,20 +786,6 @@ static int sx932x_probe(struct i2c_client *client, const struct i2c_device_id *i
 	schedule_delayed_work(&this->hwcheckworker,1);
 	pplatData->exit_platform_hw = sx932x_exit_platform_hw;
 
-	//ASUS_BSP +++ register cap_satus uevent
-	this->cap_satus_extcon = extcon_dev_allocate(asus_cap_extcon_cable);
-	if (IS_ERR(this->cap_satus_extcon)) {
-		err = PTR_ERR(this->cap_satus_extcon);
-		dev_err(this->pdev, "failed to allocate ASUS cap_satus_extcon device rc=%d\n", err);
-	}
-	this->cap_satus_extcon->fnode_name = "cap_status";
-
-	err = extcon_dev_register(this->cap_satus_extcon);
-	if (err < 0) {
-		dev_err(this->pdev, "failed to register ASUS cap_satus_extcon device rc=%d\n", err);
-	}
-	//ASUS_BSP --- register cap_satus uevent
-	
 	dev_info(&client->dev, "sx932x_probe() Done\n");
 
 	return 0;
