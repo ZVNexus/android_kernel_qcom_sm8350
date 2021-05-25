@@ -62,7 +62,6 @@ struct pm_qos_request pm_qos_req_vb;
  *
  ******************************************************/
 #define AW8697_RTP_NAME_MAX        64
-extern bool disable_vibrator;
 static char *aw8697_ram_name = "aw8697_haptic.bin";
 static char aw8697_rtp_name[][AW8697_RTP_NAME_MAX] = {
 	{"aw8697_osc_rtp_24K_5s.bin"},
@@ -3855,15 +3854,6 @@ static ssize_t aw8697_boot_vibrator_store(struct device *dev,
 	rc = kstrtouint(buf, 0, &val);
 	if (rc < 0)
 		return rc;
-
-	if (disable_vibrator) {
-		aw8697->f0 = 2050;
-		aw8697->f0_calib_data=2050;
-		aw8697_haptic_upload_lra(aw8697, AW8697_HAPTIC_F0_CALI_LRA);
-		disable_vibrator = false;
-		return count;
-	}
-	pr_debug("%s: value=%d\n", __func__, val);
 
 	mutex_lock(&aw8697->lock);
 	aw8697_haptic_f0_calibration(aw8697);
