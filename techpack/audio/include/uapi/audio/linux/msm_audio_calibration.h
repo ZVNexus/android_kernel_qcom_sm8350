@@ -50,11 +50,6 @@
 							221, void *)
 /* ASUS_BSP Paul --- */
 
-/*ASUS_BSP Add for Realtek USB AJ dongle +++*/
-#define AUDIO_SET_EU_NONEU		_IOWR(CAL_IOCTL_MAGIC, \
-							235, void *)
-/*ASUS_BSP Add for Realtek USB AJ dongle ---*/
-
 /*ASUS_BSP for mic intent +++*/
 #define AUDIO_SET_AUDIORECORD_MIC_USING	_IOWR(CAL_IOCTL_MAGIC, \
 							223, void *)
@@ -126,9 +121,6 @@ enum {
 	AFE_FB_SPKR_PROT_V4_EX_VI_CAL_TYPE,
 
 	AUDIOWIZARD_FORCE_PRESET_TYPE, /* ASUS_BSP Paul +++ */
-/*ASUS_BSP Add for Realtek USB AJ dongle +++*/
-	AUDIO_SET_EU_NONEU_TYPE,
-/*ASUS_BSP Add for Realtek USB AJ dongle ---*/
 /*ASUS_BSP for mic intent +++*/
 	AUDIORECORD_MIC_USING_TYPE,
 /*ASUS_BSP for mic intent ---*/

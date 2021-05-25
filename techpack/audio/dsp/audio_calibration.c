@@ -13,10 +13,6 @@
 #include <dsp/audio_calibration.h>
 #include <dsp/audio_cal_utils.h>
 
-//ASUS_BSP Add for Realtek USB AJ dongle +++
-extern void set_asus_eu_type(int eu_type);
-//ASUS_BSP Add for Realtek USB AJ dongle ---
-
 //ASUS_BSP for mic intent +++
 #include <linux/input.h>
 //ASUS_BSP for mic intent ---
@@ -423,9 +419,6 @@ static long audio_cal_shared_ioctl(struct file *file, unsigned int cmd,
 	int32_t size;
 	struct audio_cal_basic *data = NULL;
 	int state = 0; /* ASUS_BSP Paul +++ */
-//ASUS_BSP Add for Realtek USB AJ dongle +++
-	int is_non_eu = 0;
-//ASUS_BSP Add for Realtek USB AJ dongle ---
 //ASUS_BSP for mic intent +++
 	int audiorecord_mic_using = 0;
 //ASUS_BSP for mic intent ---
@@ -451,18 +444,6 @@ static long audio_cal_shared_ioctl(struct file *file, unsigned int cmd,
 		mutex_unlock(&audio_cal.cal_mutex[AUDIOWIZARD_FORCE_PRESET_TYPE]);
 		goto done;
 	/* ASUS_BSP Paul --- */
-//ASUS_BSP Add for Realtek USB AJ dongle +++
-	case AUDIO_SET_EU_NONEU:
-		mutex_lock(&audio_cal.cal_mutex[AUDIO_SET_EU_NONEU_TYPE]);
-		if (copy_from_user(&is_non_eu, (void *)arg, sizeof(is_non_eu))) {
-			pr_err("%s: Could not copy EU/nonEU info from user\n", __func__);
-			ret = -EFAULT;
-		}
-		printk("%s: EU_or_nonEU=%d (EU:0, nonEU:1)\n", __func__, is_non_eu);
-		set_asus_eu_type(is_non_eu);
-		mutex_unlock(&audio_cal.cal_mutex[AUDIO_SET_EU_NONEU_TYPE]);
-		goto done;
-//ASUS_BSP Add for Realtek USB AJ dongle ---
 //ASUS_BSP for mic intent +++
     case AUDIO_SET_AUDIORECORD_MIC_USING:
         mutex_lock(&audio_cal.cal_mutex[AUDIORECORD_MIC_USING_TYPE]);
@@ -609,10 +590,6 @@ static long audio_cal_ioctl(struct file *f,
 							221, compat_uptr_t)
 /* ASUS_BSP Paul --- */
 
-//ASUS_BSP Add for Realtek USB AJ dongle +++
-#define AUDIO_SET_EU_NONEU32	_IOWR(CAL_IOCTL_MAGIC, \
-							235, compat_uptr_t)
-//ASUS_BSP Add for Realtek USB AJ dongle ---
 //ASUS_BSP for mic intent +++
 #define AUDIO_SET_AUDIORECORD_MIC_USING32	_IOWR(CAL_IOCTL_MAGIC, \
 							223, compat_uptr_t)
@@ -648,11 +625,6 @@ static long audio_cal_compat_ioctl(struct file *f,
 		cmd64 = AUDIO_SET_AUDIOWIZARD_FORCE_PRESET;
 		break;
 	/* ASUS_BSP Paul --- */
-//ASUS_BSP Add for Realtek USB AJ dongle +++
-	case AUDIO_SET_EU_NONEU32:
-		cmd64 = AUDIO_SET_EU_NONEU;
-		break;
-//ASUS_BSP Add for Realtek USB AJ dongle ---
 //ASUS_BSP for mic intent +++
     case AUDIO_SET_AUDIORECORD_MIC_USING32:
         cmd64 = AUDIO_SET_AUDIORECORD_MIC_USING;
