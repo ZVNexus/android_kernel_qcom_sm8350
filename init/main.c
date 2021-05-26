@@ -147,12 +147,43 @@ static char *initcall_command_line;
 static char *execute_command;
 static char *ramdisk_execute_command;
 
+#ifdef CONFIG_MACH_ASUS
+char g_lcd_unique_id[10];
+int g_lcd_stage_id;
+#endif
+
 /*
  * Used to generate warnings if static_key manipulation functions are used
  * before jump_label_init is called.
  */
 bool static_key_initialized __read_mostly;
 EXPORT_SYMBOL_GPL(static_key_initialized);
+
+#ifdef CONFIG_MACH_ASUS
+static int set_lcd_unique_id(char *str)
+{
+	scnprintf(g_lcd_unique_id, sizeof(g_lcd_unique_id), str);
+	g_lcd_stage_id = g_lcd_unique_id[6] - 48 ;
+       printk("[Display] lcd unique id = %s g_lcd_stage_id = %d\n",  g_lcd_unique_id,g_lcd_stage_id);
+    return 0;
+}
+__setup("LCD=", set_lcd_unique_id);
+EXPORT_SYMBOL(g_lcd_unique_id);
+
+bool g_Charger_mode = false;
+static int set_charger_mode(char *str)
+{
+    if ( strcmp("charger", str) == 0 )
+        g_Charger_mode = true;
+    else
+        g_Charger_mode = false;
+
+    printk("g_Charger_mode = %d\n", g_Charger_mode);
+    return 0;
+}
+__setup("androidboot.mode=", set_charger_mode);
+EXPORT_SYMBOL(g_Charger_mode);
+#endif
 
 /*
  * If set, this is an indication to the drivers that reset the underlying
