@@ -106,8 +106,7 @@ static struct bt_power_vreg_data bt_vregs_info_qca6xx0[] = {
 		{BT_VDD_RFA1_LDO, BT_VDD_RFA1_LDO_CURRENT}},
 	{NULL, "qcom,bt-vdd-rfa2",     1900000, 1900000, 0, false, true,
 		{BT_VDD_RFA2_LDO, BT_VDD_RFA2_LDO_CURRENT}},
-	{NULL, "qcom,bt-vdd-asd",      2800000, 2800000, 0, false, true,
-		{BT_VDD_ASD_LDO, BT_VDD_ASD_LDO_CURRENT}},
+	{NULL, "qcom,bt-vdd-asd",      2800000, 2800000, 0, false, true},
 	{NULL, "qcom,bt-vdd-ipa-2p2",  2200000, 2210000, 0, false, true,
 		{BT_VDD_IPA_2p2, BT_VDD_IPA_2p2_CURRENT}},
 };
