@@ -7589,19 +7589,21 @@ static int cam_ife_hw_mgr_handle_hw_dump_info(
 		}
 	}
 
-	out_port_id = event_info->res_id & 0xFF;
-	hw_mgr_res =
-		&ife_hw_mgr_ctx->res_list_ife_out[out_port_id];
-	for (i = 0; i < CAM_ISP_HW_SPLIT_MAX; i++) {
-		if (!hw_mgr_res->hw_res[i])
-			continue;
-		hw_intf = hw_mgr_res->hw_res[i]->hw_intf;
-		if (hw_intf->hw_ops.process_cmd) {
-			rc = hw_intf->hw_ops.process_cmd(
-				hw_intf->hw_priv,
-				CAM_ISP_HW_CMD_DUMP_BUS_INFO,
-				(void *)event_info,
-				sizeof(struct cam_isp_hw_event_info));
+	if (event_info->res_type == CAM_ISP_RESOURCE_VFE_OUT) {
+		out_port_id = event_info->res_id & 0xFF;
+		hw_mgr_res =
+			&ife_hw_mgr_ctx->res_list_ife_out[out_port_id];
+		for (i = 0; i < CAM_ISP_HW_SPLIT_MAX; i++) {
+			if (!hw_mgr_res->hw_res[i])
+				continue;
+			hw_intf = hw_mgr_res->hw_res[i]->hw_intf;
+			if (hw_intf->hw_ops.process_cmd) {
+				rc = hw_intf->hw_ops.process_cmd(
+					hw_intf->hw_priv,
+					CAM_ISP_HW_CMD_DUMP_BUS_INFO,
+					(void *)event_info,
+					sizeof(struct cam_isp_hw_event_info));
+			}
 		}
 	}
 
@@ -7718,7 +7720,7 @@ static int cam_ife_hw_mgr_handle_hw_rup(
 		if (atomic_read(&ife_hw_mgr_ctx->overflow_pending))
 			break;
 		ife_hwr_irq_rup_cb(ife_hw_mgr_ctx->common.cb_priv,
-			CAM_ISP_HW_EVENT_REG_UPDATE, &rup_event_data);
+			CAM_ISP_HW_EVENT_REG_UPDATE, (void *)&rup_event_data);
 		break;
 
 	case CAM_ISP_HW_VFE_IN_RDI0:
@@ -7730,7 +7732,7 @@ static int cam_ife_hw_mgr_handle_hw_rup(
 		if (atomic_read(&ife_hw_mgr_ctx->overflow_pending))
 			break;
 		ife_hwr_irq_rup_cb(ife_hw_mgr_ctx->common.cb_priv,
-			CAM_ISP_HW_EVENT_REG_UPDATE, &rup_event_data);
+			CAM_ISP_HW_EVENT_REG_UPDATE, (void *)&rup_event_data);
 		break;
 
 	case CAM_ISP_HW_VFE_IN_PDLIB:
@@ -7768,7 +7770,7 @@ static int cam_ife_hw_mgr_handle_hw_epoch(
 
 		epoch_done_event_data.frame_id_meta = event_info->reg_val;
 		ife_hw_irq_epoch_cb(ife_hw_mgr_ctx->common.cb_priv,
-			CAM_ISP_HW_EVENT_EPOCH, &epoch_done_event_data);
+			CAM_ISP_HW_EVENT_EPOCH, (void *)&epoch_done_event_data);
 
 		break;
 
@@ -7836,7 +7838,7 @@ static int cam_ife_hw_mgr_handle_hw_sof(
 			break;
 
 		ife_hw_irq_sof_cb(ife_hw_mgr_ctx->common.cb_priv,
-			CAM_ISP_HW_EVENT_SOF, &sof_done_event_data);
+			CAM_ISP_HW_EVENT_SOF, (void *)&sof_done_event_data);
 
 		break;
 
@@ -7852,7 +7854,7 @@ static int cam_ife_hw_mgr_handle_hw_sof(
 		if (atomic_read(&ife_hw_mgr_ctx->overflow_pending))
 			break;
 		ife_hw_irq_sof_cb(ife_hw_mgr_ctx->common.cb_priv,
-			CAM_ISP_HW_EVENT_SOF, &sof_done_event_data);
+			CAM_ISP_HW_EVENT_SOF, (void *)&sof_done_event_data);
 		break;
 
 	case CAM_ISP_HW_VFE_IN_PDLIB:
@@ -7889,7 +7891,7 @@ static int cam_ife_hw_mgr_handle_hw_eof(
 			break;
 
 		ife_hw_irq_eof_cb(ife_hw_mgr_ctx->common.cb_priv,
-			CAM_ISP_HW_EVENT_EOF, &eof_done_event_data);
+			CAM_ISP_HW_EVENT_EOF, (void *)&eof_done_event_data);
 
 		break;
 
@@ -7936,7 +7938,7 @@ static int cam_ife_hw_mgr_handle_hw_buf_done(
 	if (buf_done_event_data.num_handles > 0 && ife_hwr_irq_wm_done_cb) {
 		CAM_DBG(CAM_ISP, "Notify ISP context");
 		ife_hwr_irq_wm_done_cb(ife_hw_mgr_ctx->common.cb_priv,
-			CAM_ISP_HW_EVENT_DONE, &buf_done_event_data);
+			CAM_ISP_HW_EVENT_DONE, (void *)&buf_done_event_data);
 	}
 
 	CAM_DBG(CAM_ISP,
