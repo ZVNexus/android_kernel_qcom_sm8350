@@ -4480,7 +4480,6 @@ static ssize_t mode_store(struct device *dev, struct device_attribute *attr,
 		const char *buf, size_t count)
 {
 	struct dwc3_msm *mdwc = dev_get_drvdata(dev);
-	struct dwc3 *dwc = platform_get_drvdata(mdwc->dwc3);
 
 #ifdef CONFIG_MACH_ASUS
 	if (setModefromPOGO) {
