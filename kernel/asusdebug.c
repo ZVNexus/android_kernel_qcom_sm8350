@@ -272,7 +272,6 @@ void print_all_thread_info(void)
 	g_iPtr = 0;
 	memset_nc(g_phonehang_log, 0, PHONE_HANG_LOG_SIZE);
 
-	save_log("PhoneHang-%04d%02d%02d-%02d%02d%02d.txt  ---  ASUS_SW_VER_CHIP : %s----------------------------------------------\r\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, ASUS_SW_VER_CHIP);
 	save_log(" pID----ppID----NAME----------------SumTime---vruntime--SPri-NPri-State----------PmpCnt-Binder----Waiting\r\n");
 
 	for_each_process(pts){
@@ -516,7 +515,6 @@ void save_all_thread_info(void)
 	g_phonehang_log = (char *)PHONE_HANG_LOG_BUFFER;
 	g_iPtr = 0;
 	memset_nc(g_phonehang_log,0, PHONE_HANG_LOG_SIZE);
-	save_log("ASUSSlowg-%04d%02d%02d-%02d%02d%02d.txt  ---  ASUS_SW_VER_CHIP : %s----------------------------------------------\r\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, ASUS_SW_VER_CHIP);
 	save_log(" pID----ppID----NAME----------------SumTime---vruntime--SPri-NPri-State----------PmpCnt-binder----Waiting\r\n");
 	if (ptis_head != NULL) {
 		struct thread_info_save *ptis_next = ptis_head->pnext;
@@ -715,8 +713,6 @@ void delta_all_thread_info(void)
 	g_phonehang_log = (char *)PHONE_HANG_LOG_BUFFER;
 	g_iPtr = 0;
 	memset_nc(g_phonehang_log, 0, PHONE_HANG_LOG_SIZE);
-
-	save_log("ASUSSlowg-%04d%02d%02d-%02d%02d%02d-delta.txt  ---  ASUS_SW_VER_CHIP : %s----------------------------------------------\r\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, ASUS_SW_VER_CHIP);
 
 	save_log("DELTA INFO----------------------------------------------------------------------------------------------\r\n");
 	save_log(" pID----ppID----NAME----------------SumTime---vruntime--SPri-NPri-State----------PmpCnt----Waiting\r\n");
@@ -972,7 +968,6 @@ static void do_write_event_worker(struct work_struct *work)
                 "\n\n---------------System Boot----%s---------\n"
                 "[Reboot] Warm reset Reason: %s ###### \n"
                 "%s \n",
-                ASUS_SW_VER_CHIP,
                 evtlog_warm_reset_reason,
                 asus_boot_reason);
 
@@ -981,7 +976,6 @@ static void do_write_event_worker(struct work_struct *work)
                 "\n\n---------------System Boot----%s---------\n"
                 "[Shutdown] Power off Reason: %s ###### \n"
                 "%s \n",
-                ASUS_SW_VER_CHIP,
                 evtlog_poweroff_reason,
                 asus_boot_reason);
         }

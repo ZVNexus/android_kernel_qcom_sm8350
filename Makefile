@@ -1079,10 +1079,6 @@ else
        KBUILD_CPPFLAGS += -DASUS_SW_VER=\"$(ASUS_BUILD_PROJECT)_ENG\"
 endif
 
-ifneq ($(ASUS_BUILD_NUMBER_CHIPCODE),)
-       KBUILD_CPPFLAGS += -DASUS_SW_VER_CHIP=\"$(ASUS_BUILD_NUMBER_CHIPCODE)\"
-endif
-
 # Default kernel image to build when no specific target is given.
 # KBUILD_IMAGE may be overruled on the command line or
 # set in the environment
